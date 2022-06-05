@@ -6,9 +6,14 @@ public class PlayerMvmt : MonoBehaviour
 {
     public CharacterController playerController;
     public Transform cam;
+
     public float speed = 6f;
     public float turnSmoothTime = 0.1f; // so player direction does not snap to place
     private float turnSmoothVelocity;
+
+    float jumpHeight = 1.0f;
+    float gravityVal = -9.81f;
+    bool playerGrounded;
 
     void Start()
     {
@@ -18,11 +23,33 @@ public class PlayerMvmt : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        playerGrounded = playerController.isGrounded;
+
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
+        float jump = 0f;
+
+        if (playerGrounded && Input.GetKeyDown(KeyCode.Space)) {
+            Debug.Log("jump bitch");
+        }
+        //jump
+        
+        if (playerGrounded && jump < 0) {
+            jump = 0f;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space) && playerGrounded) {
+            jump += Mathf.Sqrt(jumpHeight * -3.0f * gravityVal);
+            Debug.Log("Jump");
+        }
+
+        jump += gravityVal * Time.deltaTime;
+
 
         Vector3 direction = new Vector3(horizontal, 0, vertical).normalized;
 
+
+        // WASD movement
         if (direction.magnitude >= 0.1f) { // not sure why this is necessary, maybe it accounts for controller drift?
             
             // rotate player y-direction to point where they are going
@@ -38,6 +65,8 @@ public class PlayerMvmt : MonoBehaviour
             Vector3 moveDir = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward;
             playerController.Move(moveDir.normalized * speed * Time.deltaTime);
         }
+
         
+
     }
 }
